@@ -59,7 +59,7 @@
 
       <!-- Products Grid -->
       <div v-else>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <ProductCard
             v-for="product in products"
             :key="product._id"
@@ -69,20 +69,20 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="mt-8 flex justify-center">
+        <div class="mt-8 flex justify-center">
           <div class="flex items-center gap-2">
             <button 
               @click="currentPage--" 
               :disabled="currentPage === 1"
-              class="px-3 py-1 rounded-lg border border-gray-200 disabled:opacity-50"
+              class="px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
-            <span class="px-3 py-1">{{ currentPage }} of {{ totalPages }}</span>
+            <span class="px-4 py-2">{{ currentPage }} of {{ totalPages }}</span>
             <button 
               @click="currentPage++" 
               :disabled="currentPage === totalPages"
-              class="px-3 py-1 rounded-lg border border-gray-200 disabled:opacity-50"
+              class="px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>
@@ -128,11 +128,10 @@ const fetchProducts = async () => {
         search: searchQuery.value,
         category: selectedCategory.value,
         page: currentPage.value,
-        limit: 12
+        limit: 9 // Show 9 products per page (3x3 grid)
       }
     })
     
-    console.log('Products API Response:', response.data)
     products.value = response.data.data.products
     totalPages.value = response.data.data.pagination.pages
   } catch (err) {
@@ -157,7 +156,9 @@ const handleUpvote = async (product) => {
 
 // Watch for changes in filters and pagination
 watch([searchQuery, sortBy, selectedCategory, currentPage], () => {
-  currentPage.value = 1 // Reset to first page when filters change
+  if (searchQuery.value || sortBy.value || selectedCategory.value) {
+    currentPage.value = 1 // Reset to first page when filters change
+  }
   fetchProducts()
 })
 

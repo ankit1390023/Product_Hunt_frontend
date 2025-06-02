@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
+  <div 
+    class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
+  >
     <!-- Product Image Carousel -->
     <div class="relative group">
       <div class="relative h-48 overflow-hidden">
@@ -90,16 +92,27 @@
           </div>
           <span class="text-sm text-gray-600">by {{ product.submittedBy?.username || 'Anonymous' }}</span>
         </div>
-        <button 
-          class="flex items-center gap-1 px-3 py-1.5 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all duration-200" 
-          @click="handleUpvote"
-          :class="{ 'text-orange-600 bg-orange-50': product.hasUpvoted }"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-          <span class="text-sm font-medium">{{ product.upvoteCount || 0 }}</span>
-        </button>
+        <div class="flex items-center gap-2">
+          <button 
+            class="flex items-center gap-1 px-3 py-1.5 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all duration-200" 
+            @click.stop="handleUpvote"
+            :class="{ 'text-orange-600 bg-orange-50': product.hasUpvoted }"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span class="text-sm font-medium">{{ product.upvoteCount || 0 }}</span>
+          </button>
+          <NuxtLink
+            :to="`/product/${product._id}`"
+            class="flex items-center gap-1 px-3 py-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all duration-200"
+          >
+            <span class="text-sm font-medium">View Details</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </NuxtLink>
+        </div>
       </div>
     </div>
   </div>
@@ -115,7 +128,7 @@ const props = defineProps({
     type: Object,
     required: true,
     validator: (value) => {
-      return value && typeof value === 'object' && 'name' in value
+      return value && typeof value === 'object' && 'name' in value && '_id' in value
     }
   }
 })
@@ -166,7 +179,8 @@ const formatDate = (date) => {
   }
 }
 
-const handleUpvote = () => {
+const handleUpvote = (event) => {
+  event.stopPropagation()
   emit('upvote', props.product)
 }
 
@@ -195,6 +209,7 @@ const handleAvatarError = (e) => {
   console.log('Avatar load error for:', props.product.submittedBy?.username)
   e.target.src = '/default-avatar.png'
 }
+
 </script>
 
 <style scoped>
