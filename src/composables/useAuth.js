@@ -1,8 +1,10 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
-export function useAuth() {
+export const useAuth = () => {
     const router = useRouter()
+    const userStore = useUserStore()
     const user = ref(null)
     const token = ref(null)
 
@@ -17,7 +19,12 @@ export function useAuth() {
         if (storedToken) token.value = storedToken
     }
 
-    const isAuthenticated = computed(() => !!token.value)
+    const isAuthenticated = computed(() => {
+        if (process.client) {
+            return !!localStorage.getItem('token')
+        }
+        return false
+    })
 
     const login = async (credentials) => {
         try {
@@ -59,14 +66,18 @@ export function useAuth() {
             localStorage.removeItem('token')
         }
         router.push('/login')
+        userStore.logout()
     }
 
     const checkAuth = () => {
-        if (!isAuthenticated.value) {
-            router.push('/login')
-            return false
+        if (process.client) {
+            const token = localStorage.getItem('token')
+            if (!token) {
+                return false
+            }
+            return true
         }
-        return true
+        return false
     }
 
     return {
@@ -76,6 +87,7 @@ export function useAuth() {
         login,
         register,
         logout,
-        checkAuth
+        checkAuth,
+        user: computed(() => userStore.user)
     }
 } 

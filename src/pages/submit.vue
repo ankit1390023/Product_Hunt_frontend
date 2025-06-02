@@ -298,7 +298,15 @@ import { useAuth } from '~/composables/useAuth'
 
 const router = useRouter()
 const { submitProduct, isLoading: isSubmitting } = useProduct()
-const { isAuthenticated, user, checkAuth } = useAuth()
+const { isAuthenticated, checkAuth } = useAuth()
+
+// Check authentication on mount
+onMounted(() => {
+  if (!checkAuth()) {
+    router.push('/auth/login?redirect=/submit')
+    return
+  }
+})
 
 // Define categories as a simple array
 const categories = ref([
@@ -306,15 +314,6 @@ const categories = ref([
     { value: 'SaaS', label: 'SaaS ☁️' },
     { value: 'DevTools', label: 'DevTools 🛠️' }
 ])
-
-onMounted(() => {
-    // Only check auth on client side
-    if (process.client) {
-        if (!checkAuth()) {
-            return
-        }
-    }
-})
 
 const form = ref({
   name: '',
@@ -424,13 +423,6 @@ const handleSubmit = async () => {
   error.value = null
   success.value = false
   
-  // Check authentication before submitting
-  if (!isAuthenticated.value) {
-    error.value = 'Please log in to submit a product'
-    router.push('/auth/login?redirect=/submit')
-    return
-  }
-
   try {
     // Validate form
     validateForm()

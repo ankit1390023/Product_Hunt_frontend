@@ -387,6 +387,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+// Disable default layout for register page
+definePageMeta({
+  layout: false
+})
+
 const router = useRouter()
 const { $axios } = useNuxtApp()
 const config = useRuntimeConfig()

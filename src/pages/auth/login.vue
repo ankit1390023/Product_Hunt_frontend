@@ -323,13 +323,26 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+
+// Disable default layout for login page
+definePageMeta({
+  layout: false
+})
 
 const router = useRouter()
 const { $axios } = useNuxtApp()
 const userStore = useUserStore()
+
+// Check if user is already logged in
+onMounted(() => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    router.push('/')
+  }
+})
 
 const form = ref({
   email: '',

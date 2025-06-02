@@ -16,11 +16,21 @@
 </template>
 
 <script setup>
+import { useAuth } from '~/composables/useAuth'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const { checkAuth } = useAuth()
 const { get } = useApi()
 const products = ref([])
 
-// Fetch products on component mount
+// Check authentication on mount
 onMounted(async () => {
+  if (!checkAuth()) {
+    router.push('/auth/login?redirect=/')
+    return
+  }
+  
   try {
     const { data, error } = await get('/api/products')
     if (error.value) throw error.value

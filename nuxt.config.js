@@ -21,14 +21,15 @@ export default defineNuxtConfig({
 
     // Add compatibility date
     nitro: {
-        compatibilityDate: '2025-06-01'
+        compatibilityDate: '2025-06-01',
+        preset: 'vercel'
     },
 
     modules: ['@vueuse/motion/nuxt'],
 
     app: {
         head: {
-            title: 'Product Hunt Clone',
+            title: 'Product Hunt ',
             meta: [
                 { charset: 'utf-8' },
                 { name: 'viewport', content: 'width=device-width, initial-scale=1' }
@@ -46,5 +47,9 @@ export default defineNuxtConfig({
     // Register plugins
     plugins: [
         '~/plugins/axios.js'
-    ]
+    ],
+
+    router: {
+        middleware: ['auth']
+    }
 }) 

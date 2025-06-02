@@ -97,8 +97,12 @@
 import { ref, onMounted, watch } from 'vue'
 import ProductCard from '~/components/ProductCard.vue'
 import { useProduct } from '~/composables/useProduct'
+import { useAuth } from '~/composables/useAuth'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const { isLoading, error, upvoteProduct, removeUpvote } = useProduct()
+const { checkAuth } = useAuth()
 
 // State
 const searchQuery = ref('')
@@ -162,8 +166,12 @@ watch([searchQuery, sortBy, selectedCategory, currentPage], () => {
   fetchProducts()
 })
 
-// Fetch products on mount
+// Check authentication on mount
 onMounted(() => {
+  if (!checkAuth()) {
+    router.push('/auth/login?redirect=/products')
+    return
+  }
   fetchProducts()
 })
 </script> 

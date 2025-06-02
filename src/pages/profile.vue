@@ -30,5 +30,17 @@
 </template>
 
 <script setup>
-// No composables needed for now
+import { useAuth } from '~/composables/useAuth'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const { checkAuth } = useAuth()
+
+// Check authentication on mount
+onMounted(() => {
+  if (!checkAuth()) {
+    router.push('/auth/login?redirect=/profile')
+    return
+  }
+})
 </script> 
