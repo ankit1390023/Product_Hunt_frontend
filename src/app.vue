@@ -1,15 +1,28 @@
 <template>
-  <div>
+  <NuxtLayout>
     <NuxtPage />
-    <AlertContainer />
-  </div>
+  </NuxtLayout>
 </template>
 
-<script setup>
-// NuxtPage is auto-imported
-import AlertContainer from './components/AlertContainer.vue';
-</script>
-
 <style>
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.3s;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.layout-enter-active,
+.layout-leave-active {
+  transition: all 0.3s;
+}
+.layout-enter-from,
+.layout-leave-to {
+  opacity: 0;
+}
+
 /* Add any custom styles here */
 </style>

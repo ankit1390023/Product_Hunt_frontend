@@ -212,22 +212,55 @@
                 Profile Picture (Optional)
               </label>
               <div class="mt-1">
-                <input
-                  id="avatar"
-                  type="file"
-                  accept="image/*"
-                  @change="handleAvatarChange"
-                  class="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-medium
-                    file:bg-orange-50 file:text-orange-700
-                    hover:file:bg-orange-100
-                    cursor-pointer"
-                />
-                <p class="mt-1 text-sm text-gray-500">
-                  JPG, PNG or GIF (max. 2MB)
-                </p>
+                <div class="flex items-center gap-8 mt-3">
+                  <div 
+                    class="relative h-28 w-28 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden hover:border-orange-500 transition-all duration-200 bg-white cursor-pointer"
+                    @click="$refs.avatarInput.click()"
+                  >
+                    <img
+                      v-if="avatarPreview"
+                      :src="avatarPreview"
+                      class="h-full w-full object-cover"
+                      alt="Avatar preview"
+                    />
+                    <div v-else class="text-center p-4">
+                      <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      <p class="mt-2 text-sm text-gray-500">Click to upload</p>
+                    </div>
+                    <button
+                      v-if="avatarPreview"
+                      type="button"
+                      @click.stop="clearAvatar"
+                      class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1.5 hover:bg-red-700 transition-all duration-200"
+                    >
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      @change="handleAvatarChange"
+                      class="hidden"
+                      ref="avatarInput"
+                    />
+                    <button
+                      type="button"
+                      @click="$refs.avatarInput.click()"
+                      class="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-orange-600 text-white font-semibold hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-200"
+                    >
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      {{ avatarPreview ? 'Change Avatar' : 'Upload Avatar' }}
+                    </button>
+                    <p class="mt-3 text-sm text-gray-500">Square image, max 2MB.</p>
+                  </div>
+                </div>
                 <p v-if="avatarError" class="mt-2 text-sm text-red-600">
                   {{ avatarError }}
                 </p>
@@ -368,34 +401,30 @@ const form = ref({
   avatar: null
 })
 
+const avatarFile = ref(null)
+const avatarPreview = ref(null)
 const errors = ref({})
 const loading = ref(false)
 const successMessage = ref('')
 const avatarError = ref('')
 
 const handleAvatarChange = (event) => {
-  const file = event.target.files[0]
-  if (!file) return
-
-  // Validate file type
-  const validTypes = ['image/jpeg', 'image/png', 'image/gif']
-  if (!validTypes.includes(file.type)) {
-    avatarError.value = 'Please upload a valid image file (JPEG, PNG, or GIF)'
-    return
+  const files = event.target.files;
+  if (files && files[0]) {
+    avatarFile.value = files[0];
+    avatarPreview.value = URL.createObjectURL(files[0]);
   }
+}
 
-  // Validate file size (max 2MB)
-  const maxSize = 2 * 1024 * 1024 // 2MB
-  if (file.size > maxSize) {
-    avatarError.value = 'Image size should be less than 2MB'
-    return
+const clearAvatar = () => {
+  if (avatarPreview.value) {
+    URL.revokeObjectURL(avatarPreview.value)
   }
-
-  // Clear any previous errors
-  avatarError.value = ''
-  
-  // Store the file
-  form.value.avatar = file
+  avatarFile.value = null
+  avatarPreview.value = null
+  if (avatarInput.value) {
+    avatarInput.value.value = ''
+  }
 }
 
 const validateForm = () => {
@@ -444,15 +473,12 @@ const handleRegister = async () => {
 
     // Create FormData object
     const formData = new FormData()
-    
-    // Append all form fields
     formData.append('username', form.value.username.trim())
     formData.append('email', form.value.email.trim())
     formData.append('password', form.value.password)
-    
     // Append avatar if exists
-    if (form.value.avatar) {
-      formData.append('avatar', form.value.avatar)
+    if (avatarFile.value) {
+      formData.append('avatar', avatarFile.value)
     }
 
     // Debug: Log the FormData contents
@@ -474,20 +500,24 @@ const handleRegister = async () => {
     localStorage.setItem('token', response.data.data.accessToken)
     
     // Show success message
-    successMessage.value = 'Registration successful! Redirecting...'
+    successMessage.value = 'Registration successful! Redirecting to login...'
     
-    // Redirect to home page after a short delay
+    // Redirect to login page after a short delay
     setTimeout(() => {
-      router.push('/')
+      router.push('/auth/login')
     }, 2000)
   } catch (error) {
     console.error('Frontend - Registration error:', error.response?.data || error)
-    if (error.response?.data?.errors) {
-      errors.value = error.response.data.errors
+    
+    // Show error message in alert
+    if (error.response?.data?.message) {
+      alert(error.response.data.message)
+    } else if (error.response?.data?.errors) {
+      // If there are multiple errors, show the first one
+      const firstError = Object.values(error.response.data.errors)[0]
+      alert(firstError)
     } else {
-      errors.value = {
-        general: 'An error occurred during registration. Please try again.'
-      }
+      alert('An error occurred during registration. Please try again.')
     }
   } finally {
     loading.value = false

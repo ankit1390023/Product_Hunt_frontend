@@ -4,7 +4,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const config = useRuntimeConfig()
 
     const axiosInstance = axios.create({
-        baseURL: 'http://localhost:5000',
+        baseURL: config.public.apiBase,
         withCredentials: true,
         headers: {
             'Content-Type': 'application/json',
@@ -15,6 +15,14 @@ export default defineNuxtPlugin((nuxtApp) => {
     // Request interceptor
     axiosInstance.interceptors.request.use(
         (config) => {
+            // Only access localStorage on client-side
+            if (process.client) {
+                const token = localStorage.getItem('token')
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`
+                }
+            }
+
             console.log('Making request to:', config.baseURL + config.url)
             return config
         },
@@ -35,6 +43,19 @@ export default defineNuxtPlugin((nuxtApp) => {
             if (error.response) {
                 console.error('Error data:', error.response.data)
                 console.error('Error status:', error.response.status)
+
+                // Handle 401 Unauthorized errors
+                if (error.response.status === 401 && process.client) {
+                    // Clear auth data
+                    localStorage.removeItem('token')
+                    localStorage.removeItem('user')
+
+                    // Redirect to login if not already there
+                    const router = useRouter()
+                    if (router.currentRoute.value.path !== '/auth/login') {
+                        router.push('/auth/login?redirect=' + router.currentRoute.value.path)
+                    }
+                }
             }
             return Promise.reject(error)
         }

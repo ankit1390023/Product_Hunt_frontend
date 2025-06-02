@@ -239,7 +239,34 @@
 
             <!-- Submit Button -->
             <div>
-              <p v-if="successMessage" class="mb-4 text-sm text-green-600 text-center">{{ successMessage }}</p>
+              <!-- Success Message -->
+              <div v-if="successMessage" class="mb-4 rounded-md bg-green-50 p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">{{ successMessage }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Error Message -->
+              <div v-if="errors.general" class="mb-4 rounded-md bg-red-50 p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">{{ errors.general }}</p>
+                  </div>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 :disabled="loading"
@@ -298,9 +325,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const { $axios } = useNuxtApp()
+const userStore = useUserStore()
 
 const form = ref({
   email: '',
@@ -326,10 +355,12 @@ const handleLogin = async () => {
 
     // Store the token and user data
     localStorage.setItem('token', response.data.data.accessToken)
-    localStorage.setItem('user', JSON.stringify(response.data.data.user))
+    
+    // Update the user store with the user data
+    userStore.setUser(response.data.data.user)
     
     // Show success message
-    successMessage.value = 'Login successful! Redirecting...'
+    successMessage.value = 'Login successful! Redirecting to home...'
     
     // Wait for 1 second to show the success message
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -337,12 +368,34 @@ const handleLogin = async () => {
     // Redirect to home page
     router.push('/')
   } catch (error) {
-    if (error.response?.data?.message) {
-      errors.value = {
-        general: error.response.data.message
+    console.error('Login error:', error.response?.data)
+    
+    if (error.response?.data) {
+      const errorData = error.response.data
+      
+      // Handle array of errors
+      if (Array.isArray(errorData.errors)) {
+        errors.value = errorData.errors.reduce((acc, err) => {
+          acc[err.field || 'general'] = err.message
+          return acc
+        }, {})
       }
-    } else if (error.response?.data?.errors) {
-      errors.value = error.response.data.errors
+      // Handle single error message
+      else if (errorData.message) {
+        errors.value = {
+          general: errorData.message
+        }
+      }
+      // Handle validation errors
+      else if (errorData.errors) {
+        errors.value = errorData.errors
+      }
+      // Fallback error
+      else {
+        errors.value = {
+          general: 'An error occurred during login. Please try again.'
+        }
+      }
     } else {
       errors.value = {
         general: 'An error occurred during login. Please try again.'

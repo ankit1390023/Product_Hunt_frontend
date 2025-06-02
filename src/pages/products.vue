@@ -1,7 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <TheHeader />
-  
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
       <!-- Filters and Search -->
@@ -14,11 +12,14 @@
               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
-          <select class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <select 
+            v-model="selectedCategory"
+            class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
             <option value="">All Categories</option>
-            <option value="ai">AI & ML</option>
-            <option value="productivity">Productivity</option>
-            <option value="design">Design Tools</option>
+            <option v-for="category in categories" :key="category._id" :value="category._id">
+              {{ category.name }}
+            </option>
           </select>
           <select class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
             <option value="">Sort By</option>
@@ -120,5 +121,13 @@
 </template>
 
 <script setup>
-// Add any necessary logic here
+import { ref, onMounted } from 'vue'
+import { useCategory } from '~/composables/useCategory'
+
+const { categories, fetchCategories } = useCategory()
+const selectedCategory = ref('')
+
+onMounted(() => {
+  fetchCategories()
+})
 </script> 
