@@ -51,5 +51,19 @@ export default defineNuxtConfig({
 
     router: {
         middleware: ['auth']
+    },
+
+    // Add logging configuration
+    vite: {
+        logLevel: 'error', // Only show errors in production
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks: {
+                        'vendor': ['vue', 'vue-router', 'pinia']
+                    }
+                }
+            }
+        }
     }
 }) 

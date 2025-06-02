@@ -1,6 +1,7 @@
 <template>
-  <div 
-    class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
+  <NuxtLink 
+    :to="`/product/${product._id}`"
+    class="block bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
   >
     <!-- Product Image Carousel -->
     <div class="relative group">
@@ -103,19 +104,18 @@
             </svg>
             <span class="text-sm font-medium">{{ product.upvoteCount || 0 }}</span>
           </button>
-          <NuxtLink
-            :to="`/product/${product._id}`"
-            class="flex items-center gap-1 px-3 py-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all duration-200"
+          <div
+            class="flex items-center gap-1 px-3 py-1.5 text-gray-900 hover:text-black hover:bg-gray-100 rounded-full transition-all duration-200"
           >
             <span class="text-sm font-medium">View Details</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
-          </NuxtLink>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <script setup>
@@ -174,7 +174,10 @@ const formatDate = (date) => {
   try {
     return formatDistanceToNow(new Date(date), { addSuffix: true })
   } catch (error) {
-    console.error('Error formatting date:', error)
+    // Only log in development environment
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error formatting date:', error)
+    }
     return ''
   }
 }
@@ -206,7 +209,7 @@ const getUserAvatar = (userId) => {
 }
 
 const handleAvatarError = (e) => {
-  console.log('Avatar load error for:', props.product.submittedBy?.username)
+  // Remove console.log and just handle the error silently
   e.target.src = '/default-avatar.png'
 }
 

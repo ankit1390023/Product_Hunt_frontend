@@ -42,7 +42,10 @@ export const useAuth = () => {
 
             return response.data
         } catch (error) {
-            console.error('Login error:', error)
+            // Only log in development environment
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Login error:', error)
+            }
             throw error
         }
     }
@@ -53,7 +56,10 @@ export const useAuth = () => {
             const response = await $axios.post('/api/v1/auth/register', userData)
             return response.data
         } catch (error) {
-            console.error('Registration error:', error)
+            // Only log in development environment
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Registration error:', error)
+            }
             throw error
         }
     }
