@@ -228,7 +228,6 @@ const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy5
 const links = [
   { text: 'Home', href: '/' },
   { text: 'Products', href: '/products' },
-  { text: 'Categories', href: '/categories' },
   { text: 'Submit', href: '/submit' },
   { text: 'About', href: '/about' }
 ]

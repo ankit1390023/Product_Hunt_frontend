@@ -304,19 +304,7 @@ const { isAuthenticated, user, checkAuth } = useAuth()
 const categories = ref([
     { value: 'AI', label: 'AI 🤖' },
     { value: 'SaaS', label: 'SaaS ☁️' },
-    { value: 'DevTools', label: 'DevTools 🛠️' },
-    { value: 'Mobile', label: 'Mobile 📱' },
-    { value: 'Web', label: 'Web 🌐' },
-    { value: 'Design', label: 'Design 🎨' },
-    { value: 'Marketing', label: 'Marketing 📢' },
-    { value: 'Analytics', label: 'Analytics 📊' },
-    { value: 'Security', label: 'Security 🔒' },
-    { value: 'Blockchain', label: 'Blockchain ⛓️' },
-    { value: 'IoT', label: 'IoT 🌍' },
-    { value: 'Gaming', label: 'Gaming 🎮' },
-    { value: 'Education', label: 'Education 📚' },
-    { value: 'Health', label: 'Health 🏥' },
-    { value: 'Finance', label: 'Finance 💰' }
+    { value: 'DevTools', label: 'DevTools 🛠️' }
 ])
 
 onMounted(() => {
@@ -480,7 +468,7 @@ const handleSubmit = async () => {
 
     if (response.statusCode === 201) {
       success.value = true
-      
+      alert('Product submitted successfully! Redirecting...')
       // Clear form
       form.value = {
         name: '',
@@ -510,6 +498,7 @@ const handleSubmit = async () => {
       router.push('/auth/login?redirect=/submit')
     } else {
       error.value = err.response?.data?.message || err.message || 'Failed to submit product. Please try again.'
+      alert(error.value)
     }
   }
 }
