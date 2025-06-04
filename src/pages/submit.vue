@@ -476,9 +476,9 @@ const handleSubmit = async () => {
       logoFile.value = null
       imageFiles.value = []
       
-      // Redirect after short delay to show success message
+      // Redirect to products listing page after short delay
       setTimeout(() => {
-        router.push('/products/' + response.data._id)
+        router.push('/products')
       }, 1500)
     } else {
       throw new Error(response.message || 'Failed to submit product')
